@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LeadLoop — MVP</title>
+<style>
+:root{--bg:#f4f6fb;--panel:#fff;--ink:#182033;--muted:#68738a;--line:#e3e8f1;--blue:#3559e8;--blue2:#edf1ff;--green:#137a52;--amber:#946200;--red:#b33d4a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}
+header{background:#111a30;color:white;padding:22px max(18px,calc((100vw - 1120px)/2));display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+.brand{font-size:21px;font-weight:800;letter-spacing:-.5px}.brand span{color:#9fb2ff}.tag{font-size:12px;color:#d0d8ee;border:1px solid #3a4663;border-radius:999px;padding:5px 9px}
+main{max-width:1120px;margin:25px auto;padding:0 18px 45px}.intro{display:flex;justify-content:space-between;align-items:end;gap:18px;flex-wrap:wrap;margin-bottom:22px}h1{font-size:28px;letter-spacing:-.8px;margin:0 0 5px}.muted{color:var(--muted)}.small{font-size:12px}.btn{border:0;border-radius:10px;background:var(--blue);color:white;font-weight:700;padding:10px 14px;cursor:pointer}.btn.secondary{background:var(--blue2);color:var(--blue)}.btn.ghost{background:#f0f2f7;color:#303a50}.btn.danger{background:#fff0f0;color:var(--red)}button:focus,input:focus,select:focus,textarea:focus{outline:2px solid #8ba0ff;outline-offset:2px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}.stat,.panel{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:17px}.stat .label{color:var(--muted);font-size:12px}.stat .num{font-size:27px;font-weight:800;letter-spacing:-.7px;margin-top:5px}.stat .hint{font-size:12px;color:var(--muted);margin-top:2px}
+.layout{display:grid;grid-template-columns:1.4fr .9fr;gap:16px}.panel h2{font-size:16px;margin:0 0 13px}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.toolbar input{flex:1;min-width:145px}.field{width:100%;padding:10px 11px;border:1px solid #d8dfeb;border-radius:9px;background:white;color:var(--ink);font:inherit}.list{display:flex;flex-direction:column;gap:9px}.lead{border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start;cursor:pointer}.lead.selected{border-color:var(--blue);background:#f8f9ff}.lead h3{font-size:14px;margin:0 0 3px}.lead p{font-size:12px;color:var(--muted);margin:0}.lead-right{text-align:right;white-space:nowrap}.money{font-weight:750;font-size:13px}.pill{display:inline-block;font-size:11px;font-weight:700;border-radius:999px;padding:4px 7px;background:#eef1f7;color:#47536b;margin-top:5px}.pill.new{background:#eaf2ff;color:#2853bb}.pill.follow{background:#fff2d7;color:var(--amber)}.pill.booked{background:#e5f7ee;color:var(--green)}.pill.won{background:#d9f3e7;color:#086444}.pill.lost{background:#ffe8e8;color:var(--red)}
+.empty{padding:25px 10px;text-align:center;color:var(--muted);font-size:13px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.formgrid .full{grid-column:1/-1}label{display:block;font-size:12px;font-weight:700;color:#4d5870;margin-bottom:5px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.divider{border:0;border-top:1px solid var(--line);margin:17px 0}.message{width:100%;min-height:140px;resize:vertical;padding:12px;border:1px solid #d8dfeb;border-radius:10px;font:14px/1.5 inherit}.notice{background:#fff8e6;border:1px solid #f0dfac;color:#765600;padding:11px 12px;border-radius:10px;font-size:12px;margin-top:13px}.footer{color:var(--muted);font-size:12px;margin-top:17px}
+@media(max-width:800px){.layout{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}h1{font-size:24px}}
+</style>
+</head>
+<body>
+<header><div class="brand">Lead<span>Loop</span></div><div class="tag">WORKING MVP · DEMO DATA STORED IN THIS BROWSER</div></header>
+<main>
+  <div class="intro"><div><h1>Lead follow-up workspace</h1><div class="muted">Track enquiries, prioritise the next action, and draft better follow-ups.</div></div><button class="btn" id="newBtn">＋ Add lead</button></div>
+  <section class="stats">
+    <div class="stat"><div class="label">Active leads</div><div class="num" id="sActive">0</div><div class="hint">Not won or lost</div></div>
+    <div class="stat"><div class="label">Follow-ups due</div><div class="num" id="sDue">0</div><div class="hint">Due today or overdue</div></div>
+    <div class="stat"><div class="label">Pipeline value</div><div class="num" id="sValue">€0</div><div class="hint">Active estimated value</div></div>
+    <div class="stat"><div class="label">Appointments</div><div class="num" id="sBooked">0</div><div class="hint">Currently booked</div></div>
+  </section>
+  <div class="layout">
+    <section class="panel">
+      <h2>Lead pipeline</h2>
+      <div class="toolbar"><input class="field" id="search" placeholder="Search name, company, notes…"><select class="field" id="filter" style="max-width:160px"><option value="all">All statuses</option><option>New</option><option>Follow-up</option><option>Booked</option><option>Won</option><option>Lost</option></select></div>
+      <div class="list" id="leadList"></div>
+      <div class="footer">Select a lead to edit details or generate a follow-up draft.</div>
+    </section>
+    <section class="panel">
+      <h2 id="detailTitle">Add your first lead</h2>
+      <form id="leadForm">
+        <input type="hidden" id="leadId">
+        <div class="formgrid">
+          <div><label for="name">Contact name *</label><input class="field" id="name" required placeholder="e.g. Giulia Bianchi"></div>
+          <div><label for="company">Company</label><input class="field" id="company" placeholder="e.g. Bianchi Casa"></div>
+          <div><label for="email">Email (optional)</label><input class="field" id="email" type="email" placeholder="name@example.com"></div>
+          <div><label for="phone">Phone (optional)</label><input class="field" id="phone" placeholder="+39…"></div>
+          <div><label for="value">Potential value (€)</label><input class="field" id="value" type="number" min="0" step="50" value="1000"></div>
+          <div><label for="status">Status</label><select class="field" id="status"><option>New</option><option>Follow-up</option><option>Booked</option><option>Won</option><option>Lost</option></select></div>
+          <div><label for="due">Next follow-up date</label><input class="field" id="due" type="date"></div>
+          <div><label for="channel">Preferred channel</label><select class="field" id="channel"><option>Email</option><option>WhatsApp</option><option>Phone</option></select></div>
+          <div class="full"><label for="notes">Context / last conversation</label><textarea class="field" id="notes" rows="3" placeholder="Requested a quote on Monday; wants to decide next week…"></textarea></div>
+        </div>
+        <div class="actions"><button class="btn" type="submit">Save lead</button><button class="btn ghost" type="button" id="clearBtn">Clear form</button><button class="btn danger" type="button" id="deleteBtn" hidden>Delete</button></div>
+      </form>
+      <hr class="divider">
+      <h2>Follow-up message assistant</h2>
+      <div class="muted small" style="margin-bottom:9px">Creates a draft from the selected lead. Review it before sending.</div>
+      <label for="tone">Tone</label><select class="field" id="tone"><option value="professional">Professional and concise</option><option value="warm">Warm and personal</option><option value="direct">Direct and action-oriented</option></select>
+      <div style="margin-top:10px"><button class="btn secondary" id="draftBtn" type="button">Generate draft</button></div>
+      <div style="margin-top:10px"><textarea class="message" id="draft" placeholder="Your draft will appear here. This MVP uses local templates; no AI API is connected."></textarea></div>
+      <div class="actions"><button class="btn ghost" id="copyBtn" type="button">Copy draft</button><button class="btn ghost" id="mailtoBtn" type="button">Open email draft</button></div>
+      <div class="notice">Privacy note: this prototype saves records in this browser only. Do not enter real customer personal data into a demo. It has no login, cloud database, automated sending, or connected AI model.</div>
+    </section>
+  </div>
+  <div class="footer">LeadLoop MVP v0.1 · Demo records are fictional · Export and clear data using the controls below.</div>
+  <div class="actions"><button class="btn ghost" id="exportBtn">Export CSV</button><button class="btn danger" id="resetBtn">Reset demo data</button></div>
+</main>
+<script>
+const KEY='leadloop_mvp_v1';
+const today=()=>new Date().toISOString().slice(0,10);
+const inDays=n=>{let d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
+const seed=[
+{id:'d1',name:'Giulia Bianchi',company:'Bianchi Ristrutturazioni',email:'',phone:'',value:2400,status:'Follow-up',due:today(),channel:'Phone',notes:'Requested an estimate for a kitchen renovation. Asked to reconnect this week.',updated:Date.now()},
+{id:'d2',name:'Luca Moretti',company:'Moretti Casa',email:'',phone:'',value:850,status:'New',due:inDays(1),channel:'Email',notes:'Enquired through website about a bathroom quote.',updated:Date.now()},
+{id:'d3',name:'Sara Conti',company:'Private client',email:'',phone:'',value:5600,status:'Booked',due:inDays(3),channel:'WhatsApp',notes:'Site visit booked. Confirm date and requirements.',updated:Date.now()},
+{id:'d4',name:'Andrea Riva',company:'Riva Immobiliare',email:'',phone:'',value:1800,status:'Won',due:'',channel:'Email',notes:'Accepted proposal.',updated:Date.now()}
+];
+let leads;try{leads=JSON.parse(localStorage.getItem(KEY))||seed}catch(e){leads=seed}
+let selected=null;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const euro=n=>new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(n)||0);
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(leads))}catch(e){alert('Could not save in browser storage. Export your data before closing.')}render()}
+function active(l){return !['Won','Lost'].includes(l.status)}
+function render(){
+ const activeLeads=leads.filter(active), due=activeLeads.filter(l=>l.due&&l.due<=today());
+ $('sActive').textContent=activeLeads.length;$('sDue').textContent=due.length;
+ $('sValue').textContent=euro(activeLeads.reduce((s,l)=>s+(+l.value||0),0));
+ $('sBooked').textContent=leads.filter(l=>l.status==='Booked').length;
+ const q=$('search').value.toLowerCase(),f=$('filter').value;
+ const list=leads.filter(l=>(f==='all'||l.status===f)&&[l.name,l.company,l.notes,l.email].join(' ').toLowerCase().includes(q)).sort((a,b)=>(a.due||'9999').localeCompare(b.due||'9999'));
+ $('leadList').innerHTML=list.length?list.map(l=>`<div class="lead ${selected===l.id?'selected':''}" data-id="${esc(l.id)}"><div><h3>${esc(l.name)}</h3><p>${esc(l.company||'No company')} · ${esc(l.channel||'')}</p><p style="margin-top:5px">${l.due?'Next: '+esc(l.due):'No follow-up date'}</p></div><div class="lead-right"><div class="money">${euro(l.value)}</div><span class="pill ${l.status.toLowerCase().replace('-','')}">${esc(l.status)}</span></div></div>`).join(''):'<div class="empty">No matching leads. Add a lead to begin.</div>';
+ document.querySelectorAll('.lead').forEach(el=>el.addEventListener('click',()=>loadLead(el.dataset.id)));
+}
+function clearForm(){selected=null;$('leadForm').reset();$('leadId').value='';$('value').value=1000;$('due').value=today();$('detailTitle').textContent='Add a lead';$('deleteBtn').hidden=true;$('draft').value='';render()}
+function loadLead(id){const l=leads.find(x=>x.id===id);if(!l)return;selected=id;$('leadId').value=l.id;$('name').value=l.name;$('company').value=l.company||'';$('email').value=l.email||'';$('phone').value=l.phone||'';$('value').value=l.value||0;$('status').value=l.status;$('due').value=l.due||'';$('channel').value=l.channel||'Email';$('notes').value=l.notes||'';$('detailTitle').textContent='Edit lead';$('deleteBtn').hidden=false;render()}
+$('leadForm').addEventListener('submit',e=>{e.preventDefault();const id=$('leadId').value||'l'+Date.now();const old=leads.find(l=>l.id===id);const l={id,name:$('name').value.trim(),company:$('company').value.trim(),email:$('email').value.trim(),phone:$('phone').value.trim(),value:+$('value').value||0,status:$('status').value,due:$('due').value,channel:$('channel').value,notes:$('notes').value.trim(),updated:Date.now()};if(old)leads=leads.map(x=>x.id===id?l:x);else leads.unshift(l);selected=id;persist();loadLead(id)});
+$('newBtn').onclick=clearForm;$('clearBtn').onclick=clearForm;$('search').oninput=render;$('filter').onchange=render;
+$('deleteBtn').onclick=()=>{if(selected&&confirm('Delete this lead?')){leads=leads.filter(l=>l.id!==selected);persist();clearForm()}};
+$('draftBtn').onclick=()=>{const l=leads.find(x=>x.id===selected);if(!l){alert('Select a lead first.');return}const first=l.name.split(' ')[0];const tone=$('tone').value;let msg;
+if(tone==='warm')msg=`Buongiorno ${first}, spero stia bene. Le scrivo per riprendere il discorso relativo a ${l.notes?l.notes.replace(/[.]+$/,''):'quanto ci siamo detti'} . Se le fa comodo, possiamo sentirci nei prossimi giorni e capire insieme come procedere. Mi faccia sapere quale momento preferisce.`;
+else if(tone==='direct')msg=`Buongiorno ${first}, la contatto per un aggiornamento in merito alla nostra proposta. Possiamo fissare un breve confronto per definire i prossimi passi? Mi indica una disponibilità nei prossimi giorni?`;
+else msg=`Buongiorno ${first}, la contatto per riprendere il confronto${l.company?' relativo a '+l.company:''}. Vorrei capire se ha avuto modo di valutare quanto condiviso e se possiamo concordare il prossimo passo. Resto a disposizione per fissare un breve confronto.`;
+$('draft').value=msg.replace(' .','.')};
+$('copyBtn').onclick=async()=>{if(!$('draft').value){alert('Generate a draft first.');return}try{await navigator.clipboard.writeText($('draft').value);$('copyBtn').textContent='Copied';setTimeout(()=>$('copyBtn').textContent='Copy draft',1400)}catch(e){$('draft').select();document.execCommand('copy')}};
+$('mailtoBtn').onclick=()=>{const l=leads.find(x=>x.id===selected);if(!l||!l.email){alert('Add an email address to the selected lead first.');return}location.href='mailto:'+encodeURIComponent(l.email)+'?subject='+encodeURIComponent('Follow-up')+'&body='+encodeURIComponent($('draft').value)};
+$('exportBtn').onclick=()=>{const cols=['name','company','email','phone','value','status','due','channel','notes'];const csv=[cols.join(','),...leads.map(l=>cols.map(k=>'"'+String(l[k]??'').replace(/"/g,'""')+'"').join(','))].join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.download='leadloop-leads.csv';a.click();URL.revokeObjectURL(a.href)};
+$('resetBtn').onclick=()=>{if(confirm('Reset all local records to fictional demo data? Export first if needed.')){leads=seed.map(x=>({...x}));try{localStorage.removeItem(KEY)}catch(e){}clearForm();persist()}};
+if(!leads.length)leads=seed.map(x=>({...x}));$('due').value=today();render();
+</script>
+</body>
+</html>
